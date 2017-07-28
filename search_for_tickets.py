@@ -1,15 +1,18 @@
 import lxml as lxml
 import re
 import requests as requests
+import argparse
 from lxml.cssselect import CSSSelector
 from lxml import html
 
 
 def main():
-    plate_number = ''
-    plate_state = 'IL'
-    plate_type = 'PAS'
-    last_name = ''
+    args = parse_arguments()
+
+    plate_number = args.plate_number
+    plate_state = args.plate_state
+    plate_type = args.plate_type
+    last_name = args.last_name
     ticket_amount_selector = CSSSelector('#printFriendlyPage tbody tr')
     total_amount_due = 0
 
@@ -35,6 +38,16 @@ def main():
     else:
         print('You have no open tickets. Congratulations!')
         exit(0)
+
+
+def parse_arguments():
+    parser = argparse.ArgumentParser(description='Get the number of outstanding Chicago tickets')
+    parser.add_argument('-N', '--plate-number', type=str, help='License plate number', required=True)
+    parser.add_argument('-S', '--plate-state', type=str, help='Registered state', default='IL')
+    parser.add_argument('-T', '--plate-type', type=str, help='Plate class type', default='PAS')
+    parser.add_argument('-L', '--last-name', type=str, help='Registered owner\'s last name', required=True)
+    args = parser.parse_args()
+    return args
 
 
 def construct_clean_amount(amount):
