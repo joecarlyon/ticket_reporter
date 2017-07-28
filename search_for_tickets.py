@@ -14,7 +14,6 @@ def main():
     plate_type = args.plate_type
     last_name = args.last_name
     ticket_amount_selector = CSSSelector('#printFriendlyPage tbody tr')
-    total_amount_due = 0
 
     url = construct_url(plate_number, plate_state, plate_type, last_name)
     response = requests.get(url)
@@ -25,19 +24,31 @@ def main():
     all_tickets = ticket_amount_selector(tree)
 
     if len(all_tickets) > 0:
-        print("You have %d tickets" % len(all_tickets))
-        for count, ticket in enumerate(all_tickets):
-            amount_due_locator = CSSSelector("#spanConfirmAmount%d" % count)
-            amount = amount_due_locator(ticket)
-            clean_amount = construct_clean_amount(amount)
-            if clean_amount > 0:
-                print("You have an outstanding ticket worth: %s" % clean_amount)
-                total_amount_due += clean_amount
-            else:
-                print('This ticket is not a problem')
+        open_each_ticket(all_tickets)
     else:
         print('You have no open tickets. Congratulations!')
         exit(0)
+
+
+def open_each_ticket(all_tickets):
+    total_amount_due = 0
+    print("You have %d tickets" % len(all_tickets))
+    print("-" * 75)
+
+    for count, ticket in enumerate(all_tickets):
+        ticket_number = ticket[1].text
+        ticket_date = ticket[5].text
+        amount = ticket[6][0].text
+        clean_amount = construct_clean_amount(amount)
+        print_ticket_info(ticket_number, ticket_date, clean_amount)
+        total_amount_due += clean_amount
+
+
+def print_ticket_info(ticket_number, ticket_date, clean_amount):
+    if clean_amount > 0:
+        print("Ticket %s issued on %s has an outstanding amount of:" % (ticket_number, ticket_date, clean_amount))
+    else:
+        print('Ticket %s issued on %s has been resolved' % (ticket_number, ticket_date))
 
 
 def parse_arguments():
@@ -51,7 +62,7 @@ def parse_arguments():
 
 
 def construct_clean_amount(amount):
-    clean_amount = re.sub(r"[^\d|\.]", "", amount[0].text)
+    clean_amount = re.sub(r"[^\d|\.]", "", amount)
     return int(round(float(clean_amount)))
 
 
