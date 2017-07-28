@@ -7,7 +7,7 @@ Everyone should be alerted of any tickets they may have but don't know about. I 
 Python 3
 
 ## Sample Usage
-`python3 search_for_ticket.py -N X655504 -L Smith`
+`python3 search_for_ticket.py --plate-number X655504 --last-name Smith`
 
 ### Sample output
 >You have 7 tickets
